@@ -386,3 +386,63 @@ body.contact-page nav a.active{
 @media (max-width: 640px){
   .contact-hero h1{ font-size:48px; }
 }
+
+
+/* ======= Zonas con filtros ======= */
+.zones{ padding: clamp(1.5rem, 6vw, 3rem) 0; }
+.zones .back-btn{ margin-bottom:.6rem; }
+.zones-title{ margin-top:0; }
+
+.zones-controls{ display:grid; grid-template-columns: 1fr; gap:.6rem; margin-bottom:.8rem; }
+.zones-controls input[type="search"]{ width:100%; padding:.65rem .9rem; border:1px solid #d8e0c4; border-radius:10px; background:#fff; box-shadow: inset 0 4px 10px rgba(0,0,0,.06); }
+
+.chips{ display:flex; flex-wrap:wrap; gap:.4rem; }
+.chip{ padding:.4rem .75rem; border-radius:999px; border:1px solid #d8e0c4; background:#fff; cursor:pointer; font-weight:600; transition:background .18s, box-shadow .18s, transform .12s; }
+.chip:hover{ transform:translateY(-1px); box-shadow:0 6px 14px rgba(0,0,0,.08); }
+.chip.active{ background:#7b4a2a; color:#fff; border-color:#7b4a2a; }
+
+.zones-meta{ font-size:.9rem; color:#475569; }
+
+.zones-layout{ display:grid; grid-template-columns: 1fr; gap:1rem; }
+.zones-list{ background:#fff; border:1px solid #e5e7eb; border-radius:12px; box-shadow:0 12px 28px rgba(0,0,0,.08); max-height: clamp(240px, 40vh, 420px); overflow:auto; padding:.4rem; }
+.zones-list ul{ list-style:none; margin:0; padding:0; }
+.zones-list li{ border-radius:10px; padding:.6rem .7rem; margin:.25rem 0; cursor:pointer; display:flex; justify-content:space-between; gap:.6rem; transition:background .18s, transform .12s, box-shadow .18s; }
+.zones-list li:hover{ background:#f1f5eb; transform: translateY(-1px); }
+.zones-list .title{ font-weight:700; }
+.zones-list .tag{ font-size:.8rem; padding:.1rem .5rem; border-radius:999px; background:#eef5d8; }
+
+.map-wrap{ width:100%; }
+#mapZonas{ width:100%; height: clamp(320px, 65vh, 560px); border-radius:12px; box-shadow:0 16px 38px rgba(0,0,0,.18); overflow:hidden; }
+
+@media (min-width: 1000px){
+  .zones-layout{ grid-template-columns: 340px 1fr; align-items:stretch; }
+  .zones-list{ max-height:none; }
+}
+
+/* Ajuste de controles Leaflet */
+.leaflet-control-zoom a{ border-radius: 8px !important; }
+
+
+
+/* ======= Zonas ======= */
+.zones{ padding: clamp(1.5rem, 6vw, 3rem) 0; }
+.zones .back-btn{ margin-bottom:.6rem; }
+.zones-title{ margin-top:0; }
+
+/* Mapa responsivo (similar a tu maqueta, casi cuadrado) */
+.map-wrap{
+  width: min(980px, 92%);
+  margin: 0 auto;
+}
+#mapZonas{
+  width: 100%;
+  height: clamp(320px, 70vh, 560px);
+  border-radius: 8px;
+  box-shadow: 0 16px 38px rgba(0,0,0,.18);
+  overflow: hidden;
+}
+
+/* Ajuste de controles Leaflet para que se vean redondeados */
+.leaflet-control-zoom a{
+  border-radius: 8px !important;
+}

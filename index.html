@@ -7,6 +7,17 @@
   <meta name="description" content="PuntoSabor conecta a los usuarios con huariques auténticos y ayuda a los emprendedores a crecer." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Just+Another+Hand&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+
+<!-- Leaflet -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script
+  defer
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
 </head>
 <body>
   <!-- ======= Header ======= -->
@@ -77,127 +88,242 @@
 
   <!-- ======= Router SPA con secciones por archivo ======= -->
   <script>
-  (function(){
-    const app   = document.getElementById('app');
-    const NAV   = document.getElementById('main-nav');
+(function(){
+  const app = document.getElementById('app');
+  const NAV = document.getElementById('main-nav');
 
-    const routes = {
-      inicio:   'sections/inicio.html',
-      planes:   'sections/planes.html',
-      contacto: 'sections/contacto.html',
-      perfil:   'sections/perfil.html',
-      promos:   'sections/promos.html',
-      zonas:    'sections/zonas.html'
-    };
+  const routes = {
+    inicio:   'sections/inicio.html',
+    planes:   'sections/planes.html',
+    contacto: 'sections/contacto.html',
+    perfil:   'sections/perfil.html',
+    promos:   'sections/promos.html',
+    zonas:    'sections/zonas.html'
+  };
 
-    async function load(route, push=true){
-      const file = routes[route] || routes['inicio'];
-      try{
-        const res  = await fetch(file, {cache:'no-cache'});
-        const html = res.ok ? await res.text() :
-          `<div class="container placeholder"><h2>Error</h2><p>No se pudo cargar <code>${file}</code>.</p></div>`;
-        app.innerHTML = html;
-        setActive(route);
-        if(push) history.pushState({route}, '', '#'+route);
-        const chk = document.getElementById('nav-toggle'); if(chk) chk.checked = false;
-        window.scrollTo({top:0, behavior:'smooth'});
+  async function load(route, push=true){
+    const file = routes[route] || routes['inicio'];
+    try{
+      const res  = await fetch(file, {cache:'no-cache'});
+      const html = res.ok ? await res.text() :
+        `<div class="container placeholder"><h2>Error</h2><p>No se pudo cargar <code>${file}</code>.</p></div>`;
+      app.innerHTML = html;
+      setActive(route);
+      if(push) history.pushState({route}, '', '#'+route);
+      const chk = document.getElementById('nav-toggle'); if(chk) chk.checked = false;
+      window.scrollTo({top:0, behavior:'smooth'});
 
-        // Inicialización por sección
-        if(route === 'perfil') initPerfil();
-      }catch(e){
-        app.innerHTML = `<div class="container placeholder"><h2>Ups</h2><p>${e}</p></div>`;
-      }
+      // Inicializaciones por sección
+      if(route === 'perfil') initPerfil();
+      if(route === 'zonas')  waitForLeaflet(initZonas); // <-- ahora sí
+    }catch(e){
+      app.innerHTML = `<div class="container placeholder"><h2>Ups</h2><p>${e}</p></div>`;
     }
+  }
 
-    function setActive(route){
-      NAV.querySelectorAll('a').forEach(a=>{
-        a.classList.toggle('active', a.dataset.route === route);
-      });
+  // Espera a que Leaflet (L) exista antes de inicializar zonas
+  function waitForLeaflet(cb, tries=0){
+    if (window.L && typeof L.map === 'function') { cb(); return; }
+    if (tries > 40) return; // ~4s
+    setTimeout(()=> waitForLeaflet(cb, tries+1), 100);
+  }
+
+  function setActive(route){
+    NAV.querySelectorAll('a').forEach(a=>{
+      a.classList.toggle('active', a.dataset.route === route);
+    });
+  }
+
+  document.addEventListener('click', (e)=>{
+    const a = e.target.closest('a[data-route]');
+    if(!a) return;
+    const route = a.dataset.route;
+    if(routes[route]){
+      e.preventDefault();
+      load(route, true);
     }
+  });
 
-    document.addEventListener('click', (e)=>{
-      const a = e.target.closest('a[data-route]');
-      if(!a) return;
-      const route = a.dataset.route;
-      if(routes[route]){
-        e.preventDefault();
-        load(route, true);
-      }
-    });
+  window.addEventListener('popstate', ()=>{
+    const route = (location.hash || '#inicio').slice(1);
+    load(route, false);
+  });
 
-    window.addEventListener('popstate', ()=>{
-      const route = (location.hash || '#inicio').slice(1);
-      load(route, false);
-    });
+  // Año footer + carga inicial
+  document.getElementById('y').textContent = new Date().getFullYear();
+  const start = (location.hash || '#inicio').slice(1);
+  load(start, false);
 
-    // Año footer + carga inicial
-    document.getElementById('y').textContent = new Date().getFullYear();
-    const start = (location.hash || '#inicio').slice(1);
-    load(start, false);
+  /* ======= LÓGICA DE PERFIL ======= */
+  function initPerfil(){
+    const $ = (sel) => app.querySelector(sel);
+    const bio         = $('#bio');
+    const fileBanner  = $('#fileBanner');
+    const bannerPrev  = $('#bannerPreview');
 
-    /* ======= LÓGICA DE PERFIL ======= */
-    function initPerfil(){
-      const $ = (sel) => app.querySelector(sel);
-      const bio         = $('#bio');
-      const fileBanner  = $('#fileBanner');
-      const bannerPrev  = $('#bannerPreview');
+    const btnUpload   = $('#btnUpload');
+    const btnRemove   = $('#btnRemoveImg');
+    const btnEdit     = $('#btnEdit');
+    const btnSave     = $('#btnSave');
+    const btnDelete   = $('#btnDelete');
+    const btnBackTop  = app.querySelector('.back-btn');
+    const btnGoBack   = $('#btnGoBack');
+    const btnPlus     = $('#btnPlus');
 
-      const btnUpload   = $('#btnUpload');
-      const btnRemove   = $('#btnRemoveImg');
-      const btnEdit     = $('#btnEdit');
-      const btnSave     = $('#btnSave');
-      const btnDelete   = $('#btnDelete');
-      const btnBackTop  = app.querySelector('.back-btn');
-      const btnGoBack   = $('#btnGoBack');
-      const btnPlus     = $('#btnPlus');
-
-      // Restaura desde localStorage
-      bio.value = localStorage.getItem('perfil.bio') || '';
-      const imgData = localStorage.getItem('perfil.banner');
+    if(bio) bio.value = localStorage.getItem('perfil.bio') || '';
+    const imgData = localStorage.getItem('perfil.banner');
+    if(bannerPrev){
       if(imgData){ bannerPrev.src = imgData; } else { bannerPrev.removeAttribute('src'); }
+    }
 
-      // Subir imagen
-      btnUpload?.addEventListener('click', () => fileBanner.click());
-      fileBanner?.addEventListener('change', (e)=>{
-        const file = e.target.files?.[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
+    btnUpload?.addEventListener('click', ()=> fileBanner?.click());
+    fileBanner?.addEventListener('change', (e)=>{
+      const file = e.target.files?.[0]; if(!file) return;
+      const reader = new FileReader();
+      reader.onload = ()=>{
+        if(bannerPrev){
           bannerPrev.src = reader.result;
           localStorage.setItem('perfil.banner', reader.result);
-        };
-        reader.readAsDataURL(file);
-      });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
 
-      // Borrar imagen
-      btnRemove?.addEventListener('click', ()=>{
-        bannerPrev.removeAttribute('src');
-        fileBanner.value = '';
-        localStorage.removeItem('perfil.banner');
-      });
+    btnRemove?.addEventListener('click', ()=>{
+      bannerPrev?.removeAttribute('src');
+      if(fileBanner) fileBanner.value = '';
+      localStorage.removeItem('perfil.banner');
+    });
 
-      // Editar / Guardar / Eliminar
-      btnEdit?.addEventListener('click', ()=>{ bio.removeAttribute('readonly'); bio.focus(); });
-      btnSave?.addEventListener('click', ()=>{
+    btnEdit?.addEventListener('click', ()=>{ bio?.removeAttribute('readonly'); bio?.focus(); });
+    btnSave?.addEventListener('click', ()=>{
+      if(bio){
         localStorage.setItem('perfil.bio', bio.value.trim());
         bio.setAttribute('readonly','readonly');
-      });
-      btnDelete?.addEventListener('click', ()=>{
+      }
+    });
+    btnDelete?.addEventListener('click', ()=>{
+      if(bio){
         bio.value = '';
         localStorage.removeItem('perfil.bio');
         bio.setAttribute('readonly','readonly');
-      });
+      }
+    });
 
-      // Regresar
-      const goBack = () => history.back();
-      btnBackTop?.addEventListener('click', goBack);
-      btnGoBack?.addEventListener('click', goBack);
+    const goBack = ()=> history.back();
+    btnBackTop?.addEventListener('click', goBack);
+    btnGoBack?.addEventListener('click', goBack);
 
-      // Acción del FAB (ejemplo: enfocar textarea)
-      btnPlus?.addEventListener('click', ()=>{ bio.removeAttribute('readonly'); bio.focus(); });
+    btnPlus?.addEventListener('click', ()=>{ bio?.removeAttribute('readonly'); bio?.focus(); });
+  }
+
+  /* ======= LÓGICA ZONAS (con búsqueda, chips y listado) ======= */
+  function initZonas(){
+    const $   = (sel) => app.querySelector(sel);
+    const mapEl       = $('#mapZonas');
+    const resultsUl   = $('#resultsList');
+    const chipsWrap   = $('#zonesChips');
+    const inputSearch = $('#zonesSearch');
+    const countEl     = $('#zonesCount');
+    const backBtn     = app.querySelector('.back-btn');
+    if(!mapEl) return;
+
+    const data = [
+      { id:1, name:'El Forastero',      cat:'pollo',    lat:-12.0530, lng:-77.0380 },
+      { id:2, name:'La Picantería',     cat:'criolla',  lat:-12.0632, lng:-77.0278 },
+      { id:3, name:'Cevichería Marina', cat:'mariscos', lat:-12.0476, lng:-77.0339 },
+      { id:4, name:'Pollos Don Pepe',   cat:'pollo',    lat:-12.0510, lng:-77.0411 },
+      { id:5, name:'Antojos Criollos',  cat:'criolla',  lat:-12.0455, lng:-77.0502 },
+      { id:6, name:'Dulce Sazón',       cat:'postres',  lat:-12.0439, lng:-77.0374 },
+    ];
+
+    const map = L.map(mapEl, { zoomControl:true, attributionControl:true });
+    L.tileLayer(
+      'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+      { attribution: '&copy; Esri & contributors' }
+    ).addTo(map);
+
+    const defaultPos = [-12.0464, -77.0428];
+    map.setView(defaultPos, 15);
+
+    if('geolocation' in navigator){
+      navigator.geolocation.getCurrentPosition(
+        ({coords})=>{
+          const pos = [coords.latitude, coords.longitude];
+          map.setView(pos, 16);
+          L.circleMarker(pos,{radius:6,color:'#0ea5e9'}).addTo(map).bindPopup('Estás aquí');
+        }, ()=>{}
+      );
     }
-  })();
+
+    const markerLayer = L.layerGroup().addTo(map);
+    const markersById = new Map();
+    let state = { term:'', cat:'all' };
+
+    const normalize = (s)=> (s||'').toLowerCase().normalize('NFD').replace(/\p{Diacritic}/gu,'');
+
+    function applyFilter(){
+      const t = normalize(state.term);
+      return data.filter(d=>{
+        const byCat  = state.cat==='all' ? true : d.cat===state.cat;
+        const byTerm = !t || normalize(d.name).includes(t) || normalize(d.cat).includes(t);
+        return byCat && byTerm;
+      });
+    }
+
+    function render(){
+      markerLayer.clearLayers();
+      markersById.clear();
+
+      const filtered = applyFilter();
+      if(countEl) countEl.textContent = filtered.length;
+
+      if(resultsUl){
+        resultsUl.innerHTML = '';
+        filtered.forEach(d=>{
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="title">${d.name}</span><span class="tag">${d.cat}</span>`;
+          li.addEventListener('click', ()=>{
+            const m = markersById.get(d.id);
+            if(m){ map.setView([d.lat,d.lng], 17); m.openPopup(); }
+          });
+          resultsUl.appendChild(li);
+        });
+      }
+
+      const bounds = [];
+      filtered.forEach(d=>{
+        const m = L.marker([d.lat, d.lng]).addTo(markerLayer)
+                  .bindPopup(`<strong>${d.name}</strong><br><small>${d.cat}</small>`);
+        markersById.set(d.id, m);
+        bounds.push([d.lat, d.lng]);
+      });
+      if(bounds.length) map.fitBounds(bounds, {padding:[20,20]});
+
+      setTimeout(()=> map.invalidateSize(), 150);
+    }
+
+    chipsWrap?.addEventListener('click',(e)=>{
+      const chip = e.target.closest('.chip');
+      if(!chip) return;
+      chipsWrap.querySelectorAll('.chip').forEach(c=>c.classList.toggle('active', c===chip));
+      state.cat = chip.dataset.cat;
+      render();
+    });
+
+    let tId;
+    inputSearch?.addEventListener('input',(e)=>{
+      clearTimeout(tId);
+      tId = setTimeout(()=>{ state.term = e.target.value.trim(); render(); }, 150);
+    });
+
+    backBtn?.addEventListener('click', ()=> history.back());
+
+    render();
+  }
+})();
 </script>
+
 
 </body>
 </html>

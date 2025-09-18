@@ -7,6 +7,18 @@
   <meta name="description" content="PuntoSabor conecta a los usuarios con huariques auténticos y ayuda a los emprendedores a crecer." />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Just+Another+Hand&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css" />
+
+<!-- Leaflet -->
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+<script
+  defer
+  src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
 </head>
 <body>
   <!-- ======= Header ======= -->
@@ -102,8 +114,9 @@
         const chk = document.getElementById('nav-toggle'); if(chk) chk.checked = false;
         window.scrollTo({top:0, behavior:'smooth'});
 
-        // Inicialización por sección
-        if(route === 'perfil') initPerfil();
+        // Inicializaciones por sección
+        if(route === 'perfil') initPerfil?.();
+        if(route === 'zonas')  initZonas?.();
       }catch(e){
         app.innerHTML = `<div class="container placeholder"><h2>Ups</h2><p>${e}</p></div>`;
       }
@@ -135,69 +148,62 @@
     const start = (location.hash || '#inicio').slice(1);
     load(start, false);
 
-    /* ======= LÓGICA DE PERFIL ======= */
+    /* ======= LÓGICA PERFIL (si ya la tenías) ======= */
     function initPerfil(){
+      // ... (tu initPerfil anterior, lo puedes dejar tal cual)
+    }
+
+    /* ======= LÓGICA ZONAS ======= */
+    function initZonas(){
       const $ = (sel) => app.querySelector(sel);
-      const bio         = $('#bio');
-      const fileBanner  = $('#fileBanner');
-      const bannerPrev  = $('#bannerPreview');
+      const mapEl = $('#mapZonas');
+      const back  = app.querySelector('.back-btn');
+      if(!mapEl || typeof L === 'undefined') return;
 
-      const btnUpload   = $('#btnUpload');
-      const btnRemove   = $('#btnRemoveImg');
-      const btnEdit     = $('#btnEdit');
-      const btnSave     = $('#btnSave');
-      const btnDelete   = $('#btnDelete');
-      const btnBackTop  = app.querySelector('.back-btn');
-      const btnGoBack   = $('#btnGoBack');
-      const btnPlus     = $('#btnPlus');
+      // Mapa base
+      const map = L.map(mapEl, { zoomControl:true, attributionControl:true });
 
-      // Restaura desde localStorage
-      bio.value = localStorage.getItem('perfil.bio') || '';
-      const imgData = localStorage.getItem('perfil.banner');
-      if(imgData){ bannerPrev.src = imgData; } else { bannerPrev.removeAttribute('src'); }
+      // Capa satelital (parecida a la imagen del mockup)
+      L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        { attribution: '&copy; Esri & contributors' }
+      ).addTo(map);
 
-      // Subir imagen
-      btnUpload?.addEventListener('click', () => fileBanner.click());
-      fileBanner?.addEventListener('change', (e)=>{
-        const file = e.target.files?.[0];
-        if(!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          bannerPrev.src = reader.result;
-          localStorage.setItem('perfil.banner', reader.result);
-        };
-        reader.readAsDataURL(file);
-      });
+      // Centro por defecto (Lima)
+      const defaultPos = [-12.0464, -77.0428]; // Plaza Mayor de Lima
+      map.setView(defaultPos, 15);
 
-      // Borrar imagen
-      btnRemove?.addEventListener('click', ()=>{
-        bannerPrev.removeAttribute('src');
-        fileBanner.value = '';
-        localStorage.removeItem('perfil.banner');
-      });
+      // Intentar geolocalizar y centrar
+      if('geolocation' in navigator){
+        navigator.geolocation.getCurrentPosition(
+          ({coords})=>{
+            const pos = [coords.latitude, coords.longitude];
+            map.setView(pos, 16);
+            L.marker(pos).addTo(map).bindPopup('Estás aquí');
+          },
+          ()=>{/* si falla, se queda en Lima */}
+        );
+      }
 
-      // Editar / Guardar / Eliminar
-      btnEdit?.addEventListener('click', ()=>{ bio.removeAttribute('readonly'); bio.focus(); });
-      btnSave?.addEventListener('click', ()=>{
-        localStorage.setItem('perfil.bio', bio.value.trim());
-        bio.setAttribute('readonly','readonly');
-      });
-      btnDelete?.addEventListener('click', ()=>{
-        bio.value = '';
-        localStorage.removeItem('perfil.bio');
-        bio.setAttribute('readonly','readonly');
-      });
+      // Ejemplo: puntos de “huariques” cercanos (ficticios)
+      const spots = [
+        [-12.0476, -77.0339],
+        [-12.0439, -77.0374],
+        [-12.0510, -77.0411],
+        [-12.0455, -77.0502],
+        [-12.0530, -77.0380]
+      ];
+      spots.forEach((p,i)=> L.marker(p).addTo(map).bindPopup(`Huarique #${i+1}`));
 
-      // Regresar
-      const goBack = () => history.back();
-      btnBackTop?.addEventListener('click', goBack);
-      btnGoBack?.addEventListener('click', goBack);
+      // Ajuste si el contenedor cambia de tamaño
+      setTimeout(()=> map.invalidateSize(), 300);
 
-      // Acción del FAB (ejemplo: enfocar textarea)
-      btnPlus?.addEventListener('click', ()=>{ bio.removeAttribute('readonly'); bio.focus(); });
+      // Volver
+      back?.addEventListener('click', ()=> history.back());
     }
   })();
 </script>
+
 
 </body>
 </html>

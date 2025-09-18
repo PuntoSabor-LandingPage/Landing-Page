@@ -1,0 +1,141 @@
+:root{
+  --bg:#dfecc1;           /* verde claro de fondo */
+  --ink:#2a2a2a;          /* texto principal */
+  --muted:#6b7280;        /* texto secundario */
+  --white:#ffffff;
+  --nav-border:#d1d5db;   /* borde barra superior */
+  --pill:#e5e7eb;         /* base para hover */
+  --brand:#5a3b2a;        /* marrón para wordmark */
+  --accent:#d9692b;       /* naranja del título script */
+}
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0;
+  font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
+  color:var(--ink);
+  background:var(--bg);
+}
+img{max-width:100%; display:block}
+a{text-decoration:none; color:inherit}
+.container{width:min(1120px,92%); margin-inline:auto}
+
+/* ======= Barra superior ======= */
+header{
+  position:sticky; top:0; z-index:50;
+  background:var(--white);
+  border-bottom:1px solid var(--nav-border);
+}
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:.7rem 0; gap:1rem;
+  position:relative; /* para dropdown mobile */
+}
+.brand{display:flex; align-items:center; gap:.6rem}
+
+/* LOGO NAVBAR más visible */
+.brand img{
+  width:44px; height:44px;
+  filter: drop-shadow(0 2px 8px rgba(0,0,0,.10));
+  transition: transform .18s ease, filter .18s ease;
+}
+.brand:hover img{
+  transform: translateY(-1px);
+  filter: drop-shadow(0 4px 12px rgba(0,0,0,.14));
+}
+
+/* Navegación */
+#nav-toggle{display:none}
+nav ul{
+  display:flex; gap:.8rem;
+  list-style:none; padding:0; margin:0;
+}
+nav a{
+  display:inline-block; padding:.45rem .9rem;
+  border-radius:10px; color:#111827;
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+nav a:hover{
+  background: var(--pill);
+  box-shadow: 0 4px 12px rgba(0,0,0,.10);
+  transform: translateY(-1px);
+}
+
+/* sin “pill” para el activo */
+nav a.active{
+  background: transparent;
+  box-shadow: none;
+}
+
+/* Campana */
+.bell{width:28px; height:28px; display:grid; place-items:center}
+
+/* Botón del menú (label) */
+label[for="nav-toggle"]{display:none}
+
+/* ======= Sección ¿Quiénes somos? ======= */
+.about{padding:clamp(1.5rem,6vw,3rem) 0}
+.title{
+  font-family:"Just Another Hand", cursive;
+  font-size:clamp(2.2rem,6vw,3.8rem);
+  color:var(--accent);
+  text-align:center;
+  margin:.2rem 0 1rem;
+}
+.grid{
+  display:grid; grid-template-columns:1.05fr .95fr;
+  gap:2rem; align-items:center;
+}
+.text{max-width:64ch; line-height:1.7}
+.text p{margin:.6rem 0; color:#1f2937}
+
+/* LOGO grande protagonista */
+.logoWrap{display:grid; place-items:center}
+.logoWrap img{
+  width: min(520px, 85%);
+  height: auto;
+  filter: drop-shadow(0 12px 28px rgba(0,0,0,.18));
+}
+.wordmark{
+  font-weight:800;
+  font-size:clamp(1.8rem,4.5vw,3rem);
+  color:var(--brand);
+  margin-top:1rem; letter-spacing:.5px;
+}
+
+/* ======= Responsive ======= */
+@media (max-width: 960px){
+  .grid{grid-template-columns:1fr}
+  .logoWrap{order:-1}
+  .logoWrap img{
+    width: min(380px, 75%);
+    filter: drop-shadow(0 10px 22px rgba(0,0,0,.16));
+  }
+}
+
+@media (max-width: 760px){
+  /* Mostrar botón y convertir menú a dropdown */
+  label[for="nav-toggle"]{
+    display:inline-flex; gap:.4rem; align-items:center;
+    padding:.35rem .6rem;
+    border:1px solid var(--nav-border);
+    border-radius:10px; cursor:pointer;
+    background:var(--white);
+  }
+  nav ul{
+    display:none; flex-direction:column;
+    background:var(--white);
+    border:1px solid var(--nav-border);
+    border-radius:12px; padding:.5rem;
+    position:absolute; right:1rem; top:56px; min-width:200px;
+    box-shadow: 0 14px 28px rgba(0,0,0,.12), 0 8px 10px rgba(0,0,0,.06);
+  }
+  /* Usamos ~ por si hay elementos intermedios */
+  #nav-toggle:checked ~ nav ul{display:flex}
+}
+
+/* Accesibilidad focus */
+a:focus-visible, button:focus-visible, summary:focus-visible{
+  outline:3px solid #93c5fd; outline-offset:2px;
+}

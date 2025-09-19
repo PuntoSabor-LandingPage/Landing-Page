@@ -251,7 +251,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible{
   gap: clamp(1rem, 3vw, 2rem); align-items:stretch; margin-bottom:1rem;
 }
 .card{
-  background:#fff0; /* transparente por defecto */
+  background:#fff0; 
   border-radius:28px;
 }
 .profile-media{
@@ -261,7 +261,7 @@ a:focus-visible, button:focus-visible, summary:focus-visible{
 }
 .profile-media img{
   width:100%; height:100%; object-fit:cover; display:block;
-  aspect-ratio: 1 / 1; /* cuadrado como en la maqueta */
+  aspect-ratio: 1 / 1; 
 }
 
 .profile-text{
@@ -309,10 +309,10 @@ a:focus-visible, button:focus-visible, summary:focus-visible{
 :root{
   --card:#ffffff;
   --card-border:#c9c9c9;
-  --panel:#7b3f1d;      /* marrón columna izq. */
-  --accent-2:#de8e43;   /* naranja inputs/botón */
+  --panel:#7b3f1d;      
+  --accent-2:#de8e43;  
   --accent-2-dark:#c7752e;
-  --script:#b64f2d;     /* título "Contáctanos" */
+  --script:#b64f2d;     
 }
 
 /* Mostrar "pill" activo SOLO en Contacto */
@@ -429,7 +429,7 @@ body.contact-page nav a.active{
 .zones .back-btn{ margin-bottom:.6rem; }
 .zones-title{ margin-top:0; }
 
-/* Mapa responsivo (similar a tu maqueta, casi cuadrado) */
+/* Mapa responsivo */
 .map-wrap{
   width: min(980px, 92%);
   margin: 0 auto;
@@ -462,7 +462,7 @@ body.contact-page nav a.active{
 .combo-item{ text-align:center; }
 .combo-pic{
   width: clamp(180px, 26vw, 240px);
-  aspect-ratio: 1 / 1;              /* cuadrada como la maqueta */
+  aspect-ratio: 1 / 1;              
   border-radius: 12px;
   overflow: hidden;
   box-shadow: 0 16px 38px rgba(0,0,0,.18);

@@ -34,7 +34,7 @@ header{
 }
 .brand{display:flex; align-items:center; gap:.6rem}
 .brand img{
-  width:44px; height:44px;
+  width:100px; height:100px;
   filter: drop-shadow(0 2px 8px rgba(0,0,0,.10));
   transition: transform .18s ease, filter .18s ease;
 }
@@ -445,4 +445,68 @@ body.contact-page nav a.active{
 /* Ajuste de controles Leaflet para que se vean redondeados */
 .leaflet-control-zoom a{
   border-radius: 8px !important;
+}
+
+
+/* ======= Promociones ======= */
+.promos{ padding: clamp(1.6rem, 6vw, 3rem) 0; }
+.promos-title{ margin: .2rem 0 1.2rem; }
+
+.promo-combo{
+  display:flex; align-items:center; justify-content:center;
+  gap: clamp(1rem, 5vw, 3rem);
+  margin: 0 auto clamp(1.2rem, 4vw, 2rem);
+  flex-wrap: wrap;
+}
+
+.combo-item{ text-align:center; }
+.combo-pic{
+  width: clamp(180px, 26vw, 240px);
+  aspect-ratio: 1 / 1;              /* cuadrada como la maqueta */
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 16px 38px rgba(0,0,0,.18);
+  background:#fff;
+}
+.combo-pic img{
+  width:100%; height:100%; object-fit:cover; display:block;
+}
+.combo-plus{
+  font-weight: 800;
+  color: #7b4a2a;
+  font-size: clamp(2rem, 6vw, 3.2rem);
+  line-height: 1;
+}
+
+.combo-pill{
+  margin-top: .7rem;
+  display:inline-grid; place-items:center;
+  min-width: 160px;
+  padding:.55rem .9rem;
+  border-radius: 999px;
+  background: #7b4a2a;             /* marrón */
+  color:#fff; font-weight:800; letter-spacing:.4px;
+  text-transform: uppercase;
+  font-size: .9rem;
+  box-shadow: 0 8px 18px rgba(123,74,42,.25);
+}
+
+.promo-actions{
+  display:grid; place-items:center; margin-top: .6rem;
+}
+.btn-brown{
+  display:inline-grid; place-items:center;
+  padding:.9rem 1.4rem; border-radius:14px; text-decoration:none;
+  background:#7b4a2a; color:#fff; font-weight:800; letter-spacing:.4px;
+  box-shadow: 0 14px 30px rgba(123,74,42,.30);
+  transition: transform .12s ease, box-shadow .18s ease, filter .15s ease;
+}
+  
+/* ====== Language switch ====== */
+.lang-switch select{
+  border:1px solid var(--nav-border);
+  border-radius:10px;
+  padding:.35rem .55rem;
+  background:#fff;
+  font-weight:600;
 }
